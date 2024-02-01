@@ -1,0 +1,35 @@
+<!-- <%- include("templates/header") %>
+    <h1>Hello, <%= username %>.</h1>
+    <img src="<%= randomImage %>">
+    <form action="/logout" method="GET">
+        <button type="submit">Sign out</button>
+    </form>
+<%- include("templates/footer") %> -->
+
+<%- include("templates/header") %>
+
+<main style="padding-top: 70px;">
+    <div class="container">
+        <h1 class="text-center">Hello, <%= username %>.</h1>
+
+        <div class="row mt-5">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <img src="atSad.gif" class="img-fluid" alt="Image 1">
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <img src="atSoupMe.gif" class="img-fluid" alt="Image 2">
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <img src="atVibe.gif" class="img-fluid" alt="Image 3">
+            </div>
+        </div>
+
+        <div class="text-center">
+            <form action="/logout" method="GET">
+                <button type="submit" class="btn btn-danger mt-4">Sign out</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%- include("templates/footer") %>
