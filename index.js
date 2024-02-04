@@ -17,6 +17,8 @@ app.use('/public', express.static('public'));
 
 app.set('view engine', 'ejs');
 
+app.use(express.static(__dirname + "/public"));
+
 const expireTime = 1 * 60 * 60 * 1000; //expires after 1 hour  (hours * minutes * seconds * millis)
 
 /* secret information section */
@@ -53,39 +55,21 @@ app.use(session({
 }
 ));
 
-function isValidSession(req) {
-  if (req.session.authenticated) {
-    return true;
-  }
-  return false;
-}
+// function isValidSession(req) {
+//   if (req.session.authenticated) {
+//     return true;
+//   }
+//   return false;
+// }
 
-function sessionValidation(req, res, next) {
-  if (isValidSession(req)) {
-    next();
-  }
-  else {
-    res.redirect('/login');
-  }
-}
-
-function isAdmin(req) {
-  if (req.session.user_type == 'admin') {
-    return true;
-  }
-  return false;
-}
-
-function adminAuthorization(req, res, next) {
-  if (!isAdmin(req)) {
-    res.status(403);
-    res.render("403", { error: "Not Authorized" });
-    return;
-  }
-  else {
-    next();
-  }
-}
+// function sessionValidation(req, res, next) {
+//   if (isValidSession(req)) {
+//     next();
+//   }
+//   else {
+//     res.redirect('/login');
+//   }
+// }
 
 app.get('/', (req, res) => {
   const authenticated = req.session.authenticated;
@@ -104,8 +88,9 @@ app.get('/members', (req, res) => {
   const randomIndex = Math.floor(Math.random() * images.length);
   const randomImage = '/public/' + images[randomIndex];
 
-  res.render('members', { username: req.session.username, randomImage });
+  res.render('members', { authenticated: req.session.authenticated, username: req.session.username, randomImage });
 });
+
 
 app.get('/logout', (req, res) => {
   req.session.destroy();
@@ -113,7 +98,8 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-  res.render('signup');
+  const errorMsg = req.query.error;
+  res.render('signup', { errorMsg });
 });
 
 app.post('/signupSubmit', async (req, res) => {
@@ -121,34 +107,35 @@ app.post('/signupSubmit', async (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
 
-// Check for empty fields
-let errorMsg = "";
-if (!username) {
-  errorMsg += "Name is required.";
-}
-if (!email) {
-  errorMsg += "Email is required.";
-}
-if (!password) {
-  errorMsg += "Password is required.";
-}
-if (errorMsg !== "") {
-  res.render('signupSubmit', { errorMsg: errorMsg });
-  return;
-}
+  // Check for empty fields
+  let errorMsg = "";
+  if (!username) {
+    errorMsg += "Please provide a username. ";
+  }
+  if (!email) {
+    errorMsg += "Please provide an email. ";
+  }
+  if (!password) {
+    errorMsg += "Please provide a password. ";
+  }
+
+  // If any field is missing, redirect back to /signup with error message
+  if (errorMsg !== "") {
+    res.redirect(`/signup?error=${encodeURIComponent(errorMsg)}`);
+    return;
+  }
 
   // Validate inputs using Joi
-  const schema = Joi.object(
-    {
-      username: Joi.string().alphanum().max(20).required(),
-      email: Joi.string().email().required(),
-      password: Joi.string().max(20).required()
-    });
+  const schema = Joi.object({
+    username: Joi.string().alphanum().max(20).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().max(20).required()
+  });
 
   const validationResult = schema.validate({ username, email, password });
   if (validationResult.error != null) {
     console.log(validationResult.error);
-    res.redirect("/signup");
+    res.redirect(`/signup?error=${encodeURIComponent("Invalid input. Please check your details.")}`);
     return;
   }
 
@@ -156,7 +143,7 @@ if (errorMsg !== "") {
   const existingUser = await userCollection.findOne({ username: { $eq: username } });
   if (existingUser) {
     const errorMsg = "Username already exists.";
-    res.render('signupSubmit', { errorMsg: errorMsg });
+    res.redirect(`/signup?error=${encodeURIComponent(errorMsg)}`);
     return;
   }
 
@@ -225,43 +212,6 @@ app.post('/loginSubmit', async (req, res) => {
   // redirect to members page
   res.redirect('/members');
 });
-
-app.get('/admin', sessionValidation, adminAuthorization, async (req, res) => {
-  if (!req.session.authenticated) {
-    res.redirect('/login');
-    return;
-  }
-
-  if (!isAdmin(req)) {
-    res.status(403);
-    res.render("403", { error: "Not Authorized" });
-    return;
-  }
-
-  const result = await userCollection.find({}, { projection: { username: 1, user_type: 1 } }).toArray();
-
-  res.render("admin", { users: result });
-});
-
-app.get('/admin/demote', async (req, res) => {
-  var user = req.query.user;
-
-  // Update user'a user_type using parameterized query
-  await userCollection.updateOne({ username: { $eq: user } }, { $set: { user_type: "user" } });
-
-  res.redirect("/admin");
-});
-
-app.get('/admin/promote', async (req, res) => {
-  var user = req.query.user;
-
-  // Update user's user_type using parameterized query
-  await userCollection.updateOne({ username: { $eq: user } }, { $set: { user_type: "admin" } });
-
-  res.redirect("/admin");
-});
-
-app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
   res.status(404);
