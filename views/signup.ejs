@@ -1,8 +1,7 @@
 <%- include("templates/header") %>
+  <p>create user</p>
   <form action='/signupSubmit' method='post'>
-    <input name='username' type='text' placeholder='name'>
-    <br>
-    <input name='email' type='email' placeholder='email'>
+    <input name='username' type='text' placeholder='username'>
     <br>
     <input name='password' type='password' placeholder='password'>
     <br>
@@ -11,6 +10,5 @@
     <% } %>
     <button>Submit</button>
   </form>
-
 <%- include("templates/footer") %>
 

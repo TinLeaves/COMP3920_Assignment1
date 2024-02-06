@@ -1,10 +1,13 @@
 <%- include("templates/header") %>
-
+  <p>log in</p>
   <form action='/loginSubmit' method='post'>
-    <input name='email' type='email' placeholder='email'>
+    <input name='username' type='text' placeholder='username'>
     <br>
     <input name='password' type='password' placeholder='password'>
     <br>
+    <% if (loginMsg) { %>
+      <p><%= loginMsg %></p>
+    <% } %>
     <button>Submit</button>
   </form>
   
