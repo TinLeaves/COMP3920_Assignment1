@@ -150,7 +150,6 @@ app.post('/loginSubmit', async (req, res) => {
         res.redirect('/members');
         return;
     } else {
-        // Incorrect password
         loginMsg = "Incorrect password. Please try again. ";
         res.redirect(`/login?error=${encodeURIComponent(loginMsg)}`);
         return;
