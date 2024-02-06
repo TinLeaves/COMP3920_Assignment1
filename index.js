@@ -59,7 +59,7 @@ app.get('/', (req, res) => {
 
 app.get('/members', (req, res) => {
     if (!req.session.authenticated) {
-      res.redirect('/login');
+      res.redirect('/login'); 
       return;
     }
   
@@ -68,7 +68,8 @@ app.get('/members', (req, res) => {
     const randomImage = '/public/' + images[randomIndex];
   
     res.render('members', { authenticated: req.session.authenticated, username: req.session.username, randomImage });
-  });
+});
+
 
 app.get('/createTables', async (req,res) => {
 
@@ -85,8 +86,9 @@ app.get('/createTables', async (req,res) => {
 
 app.get('/signup', (req, res) => {
     const errorMsg = req.query.error;
-    res.render('signup', { errorMsg });
-  });
+    const signupError = req.query.signupError; // Add this line to retrieve signupError
+    res.render('signup', { errorMsg, signupError });
+});
 
 app.post('/signupSubmit', async (req,res) => {
     var username = req.body.username;
@@ -110,9 +112,14 @@ app.post('/signupSubmit', async (req,res) => {
     var success = await db_users.createUser({ user: username, hashedPassword: hashedPassword });
 
     if (success) {
-        var results = await db_users.getUsers();
-
+        req.session.authenticated = true;
+        req.session.username = username;
+        // var results = await db_users.getUsers();
         res.redirect("/members");
+    } else {
+        res.render('signup', { 
+            errorMsg: "Username already exists. Please choose a different username."
+        });
     }
 });
 
