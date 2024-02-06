@@ -30,7 +30,8 @@ async function createUser(postData) {
 async function getUsers(postData) {
 	let getUsersSQL = `
 		SELECT username, password
-		FROM user;
+		FROM user
+		WHERE username = '${postData.user}';
 	`;
 	
 	try {
@@ -48,18 +49,10 @@ async function getUsers(postData) {
 }
 
 async function getUser(postData) {
-	let getUserSQL = `
-		SELECT user_id, username, password
-		FROM user
-		WHERE username = :user;
-	`;
+	let getUserSQL = `SELECT * FROM user WHERE username = '${postData.user}'`
 
-	let params = {
-		user: postData.user
-	}
-	
 	try {
-		const results = await database.query(getUserSQL, params);
+		const results = await database.query(getUserSQL);
 
         console.log("Successfully found user");
 		console.log(results[0]);
