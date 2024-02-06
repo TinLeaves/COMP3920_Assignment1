@@ -57,9 +57,22 @@ app.get('/', (req, res) => {
     res.render('index', { authenticated, username });
 });
 
+// app.get('/members', (req, res) => {
+//     if (!req.session.authenticated) {
+//       res.redirect('/login'); 
+//       return;
+//     }
+  
+//     const images = ['AT_GC.gif', 'pixel.gif', 'ok.gif'];
+//     const randomIndex = Math.floor(Math.random() * images.length);
+//     const randomImage = '/public/' + images[randomIndex];
+  
+//     res.render('members', { authenticated: req.session.authenticated, username: req.session.username, randomImage });
+// });
+
 app.get('/members', (req, res) => {
     if (!req.session.authenticated) {
-      res.redirect('/login'); 
+      res.redirect('/login');
       return;
     }
   
@@ -67,9 +80,14 @@ app.get('/members', (req, res) => {
     const randomIndex = Math.floor(Math.random() * images.length);
     const randomImage = '/public/' + images[randomIndex];
   
-    res.render('members', { authenticated: req.session.authenticated, username: req.session.username, randomImage });
-});
-
+    res.send(`
+      <h1>Hello, ${req.session.username}.</h1>
+      <img src="${randomImage}">
+      <form action="/logout" method="GET">
+        <button type="submit">Sign out</button>
+      </form>
+    `);
+  });
 
 app.get('/createTables', async (req,res) => {
 
