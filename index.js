@@ -63,7 +63,7 @@ app.get('/members', (req, res) => {
       return;
     }
   
-    const images = ['business.gif', 'atVibe.gif', 'atSoupMe.gif'];
+    const images = ['AT_GC.gif', 'pixel.gif', 'ok.gif'];
     const randomIndex = Math.floor(Math.random() * images.length);
     const randomImage = '/public/' + images[randomIndex];
   
